@@ -2,8 +2,6 @@ import os
 import shutil
 
 # --- DONNÉES DU CATALOGUE ---
-# C'est ici que tu configures tout ton site. Tu peux ajouter autant de mangas, 
-# de chapitres et d'images que tu le souhaites en respectant cette structure.
 mangas = [
     {
         "id": "maitresse-et-eleve",
@@ -45,16 +43,12 @@ def create_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-# Nettoyer l'ancien dossier s'il existe et le recréer pour éviter les doublons
 if os.path.exists(OUTPUT_DIR):
     shutil.rmtree(OUTPUT_DIR)
 create_dir(OUTPUT_DIR)
-# Création du dossier pour stocker tes images
 create_dir(os.path.join(OUTPUT_DIR, "images"))
 
 # --- TEMPLATES HTML/CSS/JS INTÉGRÉS ---
-# Le CSS gère le mode sombre, la grille, et la liseuse verticale.
-
 CSS_STYLES = """
 <style>
     :root { 
@@ -81,7 +75,6 @@ CSS_STYLES = """
     h1, h2, h3 { margin: 0; }
     .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
     
-    /* Grille du catalogue principal */
     .grid { 
         display: grid; 
         grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
@@ -103,7 +96,6 @@ CSS_STYLES = """
     .card img { width: 100%; height: 320px; object-fit: cover; }
     .card-content { padding: 15px; text-align: center; }
     
-    /* Page des détails du Manga */
     .manga-header { 
         display: flex; 
         flex-wrap: wrap;
@@ -116,7 +108,6 @@ CSS_STYLES = """
     .manga-cover { width: 250px; border-radius: 8px; object-fit: cover; }
     .manga-info { flex: 1; min-width: 300px; }
     
-    /* Bouton de tri */
     .controls { 
         margin-bottom: 20px; 
         display: flex; 
@@ -138,7 +129,6 @@ CSS_STYLES = """
     }
     .sort-btn:hover { background-color: #b20710; }
     
-    /* Liste des chapitres */
     .chapter-list { display: flex; flex-direction: column; gap: 10px; }
     .chapter-item { 
         background-color: var(--card-bg); 
@@ -152,7 +142,6 @@ CSS_STYLES = """
     }
     .chapter-item:hover { background-color: #333; color: var(--accent-color); }
     
-    /* Page Liseuse (Chapitre en scroll vertical) */
     .reader { 
         display: flex; 
         flex-direction: column; 
@@ -162,9 +151,9 @@ CSS_STYLES = """
     }
     .reader img { 
         max-width: 100%; 
-        width: 800px; /* Largeur max de l'image pour un confort de lecture */
+        width: 800px; 
         display: block; 
-        margin-bottom: 0; /* Important: Aucune marge pour coller les images */
+        margin-bottom: 0; 
     }
     .reader-nav { 
         width: 100%; 
@@ -190,7 +179,6 @@ CSS_STYLES = """
 </style>
 """
 
-# Template de la page d'accueil (Le Catalogue)
 INDEX_TEMPLATE = f"""<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -211,7 +199,6 @@ INDEX_TEMPLATE = f"""<!DOCTYPE html>
 </body>
 </html>"""
 
-# Template de la page de présentation d'un manga spécifique
 MANGA_TEMPLATE = f"""<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -248,12 +235,10 @@ MANGA_TEMPLATE = f"""<!DOCTYPE html>
         function toggleSort() {{
             const list = document.getElementById('chapter-list');
             const items = Array.from(list.children);
-            // On inverse les éléments HTML dans la liste
             items.reverse();
             list.innerHTML = '';
             items.forEach(item => list.appendChild(item));
             
-            // Mise à jour du texte du bouton
             isAscending = !isAscending;
             const btn = document.querySelector('.sort-btn');
             btn.textContent = isAscending ? "Trier: Ordre Décroissant" : "Trier: Ordre Croissant";
@@ -262,7 +247,6 @@ MANGA_TEMPLATE = f"""<!DOCTYPE html>
 </body>
 </html>"""
 
-# Template de la page de lecture d'un chapitre (Le Scroll)
 CHAPTER_TEMPLATE = f"""<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -289,7 +273,7 @@ CHAPTER_TEMPLATE = f"""<!DOCTYPE html>
 
 print("Début de la génération de ton site de mangas...")
 
-# 1. Génération des cartes pour la page d'accueil
+# 1. Génération des cartes
 manga_cards_html = ""
 for manga in mangas:
     manga_cards_html += f"""
@@ -301,18 +285,16 @@ for manga in mangas:
     </a>
     """
 
-# Écriture du fichier index.html (Catalogue)
+# Écriture index.html (CORRECTION ICI: un seul crochet)
 with open(os.path.join(OUTPUT_DIR, "index.html"), "w", encoding="utf-8") as f:
-    f.write(INDEX_TEMPLATE.replace("{{manga_cards}}", manga_cards_html))
+    f.write(INDEX_TEMPLATE.replace("{manga_cards}", manga_cards_html))
 
 
-# 2. Génération des pages internes pour chaque manga
+# 2. Génération des pages internes
 for manga in mangas:
-    # Création du dossier propre au manga (ex: dist/maitresse-et-eleve)
     manga_dir = os.path.join(OUTPUT_DIR, manga["id"])
     create_dir(manga_dir)
     
-    # Préparation de la liste des chapitres
     chapters_list_html = ""
     for chapter in manga["chapters"]:
         chapters_list_html += f"""
@@ -322,27 +304,25 @@ for manga in mangas:
         </a>
         """
         
-        # Préparation des images collées les unes aux autres pour la liseuse
         images_html = ""
         for img in chapter["images"]:
-            # "loading='lazy'" permet d'optimiser le site en chargeant les images seulement quand on scrolle
             images_html += f'<img src="{img}" alt="Page de manga" loading="lazy">\n'
             
-        # Écriture du fichier HTML du chapitre (ex: dist/maitresse-et-eleve/chapitre-0.html)
+        # Écriture du chapitre (CORRECTION ICI: un seul crochet)
         chapter_html = CHAPTER_TEMPLATE \
-            .replace("{{manga_title}}", manga["title"]) \
-            .replace("{{chapter_title}}", chapter["title"]) \
-            .replace("{{images_list}}", images_html)
+            .replace("{manga_title}", manga["title"]) \
+            .replace("{chapter_title}", chapter["title"]) \
+            .replace("{images_list}", images_html)
             
         with open(os.path.join(manga_dir, f"{chapter['id']}.html"), "w", encoding="utf-8") as f:
             f.write(chapter_html)
 
-    # Écriture du fichier HTML de la page manga (ex: dist/maitresse-et-eleve/index.html)
+    # Écriture de la page manga (CORRECTION ICI: un seul crochet)
     manga_html = MANGA_TEMPLATE \
-        .replace("{{title}}", manga["title"]) \
-        .replace("{{cover}}", manga["cover"]) \
-        .replace("{{synopsis}}", manga["synopsis"]) \
-        .replace("{{chapters_list}}", chapters_list_html)
+        .replace("{title}", manga["title"]) \
+        .replace("{cover}", manga["cover"]) \
+        .replace("{synopsis}", manga["synopsis"]) \
+        .replace("{chapters_list}", chapters_list_html)
         
     with open(os.path.join(manga_dir, "index.html"), "w", encoding="utf-8") as f:
         f.write(manga_html)
