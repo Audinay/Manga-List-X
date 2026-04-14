@@ -7,14 +7,14 @@ import shutil
 mangas = [
     {
         "id": "maitresse-et-eleve",
-        "title": "Maîtresse & Élève",
+        "title": "MOBY DICK",
         "cover": "https://raw.githubusercontent.com/Audinay/Manga-List-X/refs/heads/main/t%C3%A9l%C3%A9chargement.jpg",
-        "synopsis": "Un manga captivant où les rôles s'inversent. L'histoire suit l'évolution complexe entre les deux protagonistes principaux.",
+        "synopsis": "Un soir, Hoon-sang se retrouve en possession d’une mystérieuse carte de visite. La carte lui promet une nouvelle vie dans une ville où le sexe et l’adultère sont rois, pour peu qu’il soit prêt à échanger son corps pour de l’argent. « Tu es un ‘cadeau’ pour nos VIPs. Fais en sorte qu’elles ne t’oublient jamais… Qu’elles le veuillent ou non. »",
         "chapters": [
             {
                 "id": "chapitre-0",
                 "title": "Chapitre 0 - Le commencement",
-                "images": ["chap0_page1.jpg", "chap0_page2.jpg", "chap0_page3.jpg"]
+                "images": ["https://raw.githubusercontent.com/Audinay/Manga-List-X/refs/heads/main/Capture%20d'%C3%A9cran%202026-04-14%20151916.png", "https://raw.githubusercontent.com/Audinay/Manga-List-X/refs/heads/main/Capture%20d'%C3%A9cran%202026-04-14%20151953.png", "https://raw.githubusercontent.com/Audinay/Manga-List-X/refs/heads/main/Capture%20d'%C3%A9cran%202026-04-14%20152001.png", "https://raw.githubusercontent.com/Audinay/Manga-List-X/refs/heads/main/Capture%20d'%C3%A9cran%202026-04-14%20152102.png", "https://raw.githubusercontent.com/Audinay/Manga-List-X/refs/heads/main/Capture%20d'%C3%A9cran%202026-04-14%20152118.png", "https://raw.githubusercontent.com/Audinay/Manga-List-X/refs/heads/main/Capture%20d'%C3%A9cran%202026-04-14%20152129.png", "https://raw.githubusercontent.com/Audinay/Manga-List-X/refs/heads/main/Capture%20d'%C3%A9cran%202026-04-14%20152137.png", "https://raw.githubusercontent.com/Audinay/Manga-List-X/refs/heads/main/Capture%20d'%C3%A9cran%202026-04-14%20152146.png", "https://raw.githubusercontent.com/Audinay/Manga-List-X/refs/heads/main/Capture%20d'%C3%A9cran%202026-04-14%20152156.png", "https://raw.githubusercontent.com/Audinay/Manga-List-X/refs/heads/main/Capture%20d'%C3%A9cran%202026-04-14%20152207.png]
             },
             {
                 "id": "chapitre-1",
