@@ -1,140 +1,351 @@
 import os
+import shutil
 
-# Configuration du projet
-PROJECT_NAME = "Manga List X"
-OUTPUT_DIR = "dist" # Dossier pour Netlify
-
-# Liste factice pour l'exemple (tu pourras la remplir avec tes données)
-manga_catalog = [
-    {"id": 1, "title": "Maîtresse & Élève", "subtitle": "Une leçon particulière", "image": "https://via.placeholder.com/300x450"},
-    {"id": 2, "title": "Secret de Bureau", "subtitle": "Travail de nuit", "image": "https://via.placeholder.com/300x450"},
-    {"id": 3, "title": "Vacances d'Été", "subtitle": "Souvenirs de plage", "image": "https://via.placeholder.com/300x450"},
-    {"id": 4, "title": "La Voisine", "subtitle": "Rencontre inattendue", "image": "https://via.placeholder.com/300x450"},
+# --- DONNÉES DU CATALOGUE ---
+# C'est ici que tu configures tout ton site. Tu peux ajouter autant de mangas, 
+# de chapitres et d'images que tu le souhaites en respectant cette structure.
+mangas = [
+    {
+        "id": "maitresse-et-eleve",
+        "title": "Maîtresse & Élève",
+        "cover": "https://raw.githubusercontent.com/Audinay/Manga-List-X/refs/heads/main/t%C3%A9l%C3%A9chargement.jpg",
+        "synopsis": "Un manga captivant où les rôles s'inversent. L'histoire suit l'évolution complexe entre les deux protagonistes principaux.",
+        "chapters": [
+            {
+                "id": "chapitre-0",
+                "title": "Chapitre 0 - Le commencement",
+                "images": ["chap0_page1.jpg", "chap0_page2.jpg", "chap0_page3.jpg"]
+            },
+            {
+                "id": "chapitre-1",
+                "title": "Chapitre 1 - La découverte",
+                "images": ["chap1_page1.jpg", "chap1_page2.jpg", "chap1_page3.jpg"]
+            }
+        ]
+    },
+    {
+        "id": "autre-manga",
+        "title": "Titre du Second Manga",
+        "cover": "cover_autre.jpg",
+        "synopsis": "Ceci est un exemple pour te montrer comment le catalogue affiche plusieurs œuvres côte à côte en forme de grille.",
+        "chapters": [
+            {
+                "id": "chapitre-1",
+                "title": "Chapitre 1",
+                "images": ["autre_c1_p1.jpg", "autre_c1_p2.jpg"]
+            }
+        ]
+    }
 ]
 
-def generate_index_html():
-    # Création du design CSS (Dark & Pro)
-    css = """
-    body {
-        background-color: #0f0f0f;
-        color: #ffffff;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        margin: 0;
-        padding: 0;
+# --- CONFIGURATION DES DOSSIERS ---
+OUTPUT_DIR = "dist"
+
+def create_dir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+# Nettoyer l'ancien dossier s'il existe et le recréer pour éviter les doublons
+if os.path.exists(OUTPUT_DIR):
+    shutil.rmtree(OUTPUT_DIR)
+create_dir(OUTPUT_DIR)
+# Création du dossier pour stocker tes images
+create_dir(os.path.join(OUTPUT_DIR, "images"))
+
+# --- TEMPLATES HTML/CSS/JS INTÉGRÉS ---
+# Le CSS gère le mode sombre, la grille, et la liseuse verticale.
+
+CSS_STYLES = """
+<style>
+    :root { 
+        --bg-color: #121212; 
+        --text-color: #ffffff; 
+        --accent-color: #e50914; 
+        --card-bg: #1e1e1e; 
     }
-    header {
-        height: 40vh;
+    body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        background-color: var(--bg-color); 
+        color: var(--text-color); 
+        margin: 0; 
+        padding: 0; 
+    }
+    a { color: var(--text-color); text-decoration: none; }
+    a:hover { color: var(--accent-color); }
+    header { 
+        background-color: #000; 
+        padding: 20px; 
+        text-align: center; 
+        border-bottom: 2px solid var(--accent-color); 
+    }
+    h1, h2, h3 { margin: 0; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    
+    /* Grille du catalogue principal */
+    .grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+        gap: 25px; 
+        margin-top: 20px; 
+    }
+    .card { 
+        background-color: var(--card-bg); 
+        border-radius: 8px; 
+        overflow: hidden; 
+        transition: transform 0.3s ease, box-shadow 0.3s ease; 
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://via.placeholder.com/1200x400');
-        background-size: cover;
-        border-bottom: 2px solid #e74c3c;
     }
-    h1 {
-        font-size: 4rem;
-        margin: 0;
-        text-transform: uppercase;
-        letter-spacing: 5px;
-        color: #e74c3c;
-        text-shadow: 2px 2px 10px rgba(231, 76, 60, 0.5);
+    .card:hover { 
+        transform: translateY(-5px); 
+        box-shadow: 0 10px 20px rgba(229, 9, 20, 0.4); 
     }
-    .catalog-container {
-        padding: 50px 10%;
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 30px;
+    .card img { width: 100%; height: 320px; object-fit: cover; }
+    .card-content { padding: 15px; text-align: center; }
+    
+    /* Page des détails du Manga */
+    .manga-header { 
+        display: flex; 
+        flex-wrap: wrap;
+        gap: 30px; 
+        margin-bottom: 40px; 
+        background: var(--card-bg); 
+        padding: 20px; 
+        border-radius: 10px; 
     }
-    .manga-card {
-        background: #1a1a1a;
-        border-radius: 10px;
-        overflow: hidden;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        cursor: pointer;
-        text-decoration: none;
-        color: white;
-        border: 1px solid #333;
-    }
-    .manga-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
-        border-color: #e74c3c;
-    }
-    .manga-card img {
-        width: 100%;
-        height: 350px;
-        object-fit: cover;
-    }
-    .manga-info {
+    .manga-cover { width: 250px; border-radius: 8px; object-fit: cover; }
+    .manga-info { flex: 1; min-width: 300px; }
+    
+    /* Bouton de tri */
+    .controls { 
+        margin-bottom: 20px; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        background: #000;
         padding: 15px;
+        border-radius: 8px;
     }
-    .manga-title {
-        font-size: 1.2rem;
+    .sort-btn { 
+        background-color: var(--accent-color); 
+        color: white; 
+        border: none; 
+        padding: 10px 20px; 
+        border-radius: 5px; 
+        cursor: pointer; 
+        font-weight: bold; 
+        transition: background 0.3s;
+    }
+    .sort-btn:hover { background-color: #b20710; }
+    
+    /* Liste des chapitres */
+    .chapter-list { display: flex; flex-direction: column; gap: 10px; }
+    .chapter-item { 
+        background-color: var(--card-bg); 
+        padding: 15px 20px; 
+        border-radius: 5px; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        transition: background 0.2s; 
         font-weight: bold;
-        margin: 0;
     }
-    .manga-subtitle {
-        font-size: 0.9rem;
-        color: #aaaaaa;
-        margin-top: 5px;
+    .chapter-item:hover { background-color: #333; color: var(--accent-color); }
+    
+    /* Page Liseuse (Chapitre en scroll vertical) */
+    .reader { 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        background-color: #000; 
+        padding-top: 20px;
     }
-    footer {
-        text-align: center;
-        padding: 40px;
-        color: #555;
-        font-size: 0.8rem;
+    .reader img { 
+        max-width: 100%; 
+        width: 800px; /* Largeur max de l'image pour un confort de lecture */
+        display: block; 
+        margin-bottom: 0; /* Important: Aucune marge pour coller les images */
     }
+    .reader-nav { 
+        width: 100%; 
+        padding: 15px 30px; 
+        background: #111; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        position: sticky; 
+        top: 0; 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.8); 
+        box-sizing: border-box;
+    }
+    .reader-nav a {
+        background: #333;
+        padding: 8px 15px;
+        border-radius: 5px;
+        transition: background 0.3s;
+    }
+    .reader-nav a:hover {
+        background: var(--accent-color);
+    }
+</style>
+"""
+
+# Template de la page d'accueil (Le Catalogue)
+INDEX_TEMPLATE = f"""<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalogue - Mangas</title>
+    {CSS_STYLES}
+</head>
+<body>
+    <header>
+        <h1>Bibliothèque de Mangas</h1>
+    </header>
+    <div class="container">
+        <div class="grid">
+            {{manga_cards}}
+        </div>
+    </div>
+</body>
+</html>"""
+
+# Template de la page de présentation d'un manga spécifique
+MANGA_TEMPLATE = f"""<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    {CSS_STYLES}
+</head>
+<body>
+    <header>
+        <h1><a href="../index.html">← Retour au Catalogue</a></h1>
+    </header>
+    <div class="container">
+        <div class="manga-header">
+            <img src="../images/{{cover}}" alt="Couverture de {{title}}" class="manga-cover">
+            <div class="manga-info">
+                <h2>{{title}}</h2>
+                <p style="margin-top: 20px; line-height: 1.6; font-size: 1.1em; color: #ccc;">{{synopsis}}</p>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <h3 style="margin: 0;">Liste des Chapitres</h3>
+            <button class="sort-btn" onclick="toggleSort()">Trier: Ordre Décroissant</button>
+        </div>
+        
+        <div class="chapter-list" id="chapter-list">
+            {{chapters_list}}
+        </div>
+    </div>
+
+    <script>
+        let isAscending = true;
+        function toggleSort() {{
+            const list = document.getElementById('chapter-list');
+            const items = Array.from(list.children);
+            // On inverse les éléments HTML dans la liste
+            items.reverse();
+            list.innerHTML = '';
+            items.forEach(item => list.appendChild(item));
+            
+            // Mise à jour du texte du bouton
+            isAscending = !isAscending;
+            const btn = document.querySelector('.sort-btn');
+            btn.textContent = isAscending ? "Trier: Ordre Décroissant" : "Trier: Ordre Croissant";
+        }}
+    </script>
+</body>
+</html>"""
+
+# Template de la page de lecture d'un chapitre (Le Scroll)
+CHAPTER_TEMPLATE = f"""<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{manga_title}} - {{chapter_title}}</title>
+    {CSS_STYLES}
+</head>
+<body style="background-color: #000;">
+    <div class="reader-nav">
+        <a href="index.html">← Retour aux chapitres</a>
+        <span style="font-weight: bold; font-size: 1.2em;">{{chapter_title}}</span>
+        <span></span> 
+    </div>
+    
+    <div class="reader">
+        {{images_list}}
+    </div>
+</body>
+</html>"""
+
+
+# --- LOGIQUE DE GÉNÉRATION DES FICHIERS ---
+
+print("Début de la génération de ton site de mangas...")
+
+# 1. Génération des cartes pour la page d'accueil
+manga_cards_html = ""
+for manga in mangas:
+    manga_cards_html += f"""
+    <a href="{manga['id']}/index.html" class="card">
+        <img src="images/{manga['cover']}" alt="{manga['title']}">
+        <div class="card-content">
+            <h3>{manga['title']}</h3>
+        </div>
+    </a>
     """
 
-    # Construction du catalogue en HTML
-    cards_html = ""
-    for manga in manga_catalog:
-        cards_html += f"""
-        <a href="manga_{manga['id']}.html" class="manga-card">
-            <img src="{manga['image']}" alt="{manga['title']}">
-            <div class="manga-info">
-                <div class="manga-title">{manga['title']}</div>
-                <div class="manga-subtitle">{manga['subtitle']}</div>
-            </div>
+# Écriture du fichier index.html (Catalogue)
+with open(os.path.join(OUTPUT_DIR, "index.html"), "w", encoding="utf-8") as f:
+    f.write(INDEX_TEMPLATE.replace("{{manga_cards}}", manga_cards_html))
+
+
+# 2. Génération des pages internes pour chaque manga
+for manga in mangas:
+    # Création du dossier propre au manga (ex: dist/maitresse-et-eleve)
+    manga_dir = os.path.join(OUTPUT_DIR, manga["id"])
+    create_dir(manga_dir)
+    
+    # Préparation de la liste des chapitres
+    chapters_list_html = ""
+    for chapter in manga["chapters"]:
+        chapters_list_html += f"""
+        <a href="{chapter['id']}.html" class="chapter-item">
+            <span>{chapter['title']}</span>
+            <span style="color: var(--accent-color);">Lire le chapitre →</span>
         </a>
         """
+        
+        # Préparation des images collées les unes aux autres pour la liseuse
+        images_html = ""
+        for img in chapter["images"]:
+            # "loading='lazy'" permet d'optimiser le site en chargeant les images seulement quand on scrolle
+            images_html += f'<img src="../images/{img}" alt="Page de manga" loading="lazy">\n'
+            
+        # Écriture du fichier HTML du chapitre (ex: dist/maitresse-et-eleve/chapitre-0.html)
+        chapter_html = CHAPTER_TEMPLATE \
+            .replace("{{manga_title}}", manga["title"]) \
+            .replace("{{chapter_title}}", chapter["title"]) \
+            .replace("{{images_list}}", images_html)
+            
+        with open(os.path.join(manga_dir, f"{chapter['id']}.html"), "w", encoding="utf-8") as f:
+            f.write(chapter_html)
 
-    # Structure complète de la page
-    html_content = f"""
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{PROJECT_NAME}</title>
-        <style>{css}</style>
-    </head>
-    <body>
-        <header>
-            <h1>{PROJECT_NAME}</h1>
-            <p>Le catalogue ultime des mangas X</p>
-        </header>
+    # Écriture du fichier HTML de la page manga (ex: dist/maitresse-et-eleve/index.html)
+    manga_html = MANGA_TEMPLATE \
+        .replace("{{title}}", manga["title"]) \
+        .replace("{{cover}}", manga["cover"]) \
+        .replace("{{synopsis}}", manga["synopsis"]) \
+        .replace("{{chapters_list}}", chapters_list_html)
+        
+    with open(os.path.join(manga_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write(manga_html)
 
-        <main class="catalog-container">
-            {cards_html}
-        </main>
-
-        <footer>
-            &copy; 2026 {PROJECT_NAME} - Contenu pour adultes
-        </footer>
-    </body>
-    </html>
-    """
-
-    # Créer le dossier et sauvegarder le fichier
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
-    
-    with open(f"{OUTPUT_DIR}/index.html", "w", encoding="utf-8") as f:
-        f.write(html_content)
-    
-    print(f"Site généré avec succès dans le dossier '{OUTPUT_DIR}'")
-
-if __name__ == "__main__":
-    generate_index_html()
+print("Génération terminée avec succès !")
+print("Tous tes fichiers sont prêts dans le dossier 'dist'. N'oublie pas d'uploader tes images dans le dossier 'dist/images' sur GitHub avant de déployer.")
