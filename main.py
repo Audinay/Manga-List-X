@@ -226,7 +226,7 @@ MANGA_TEMPLATE = f"""<!DOCTYPE html>
     </header>
     <div class="container">
         <div class="manga-header">
-            <img src="../images/{{cover}}" alt="Couverture de {{title}}" class="manga-cover">
+            <img src="{{cover}}" alt="Couverture de {{title}}" class="manga-cover">
             <div class="manga-info">
                 <h2>{{title}}</h2>
                 <p style="margin-top: 20px; line-height: 1.6; font-size: 1.1em; color: #ccc;">{{synopsis}}</p>
@@ -294,7 +294,7 @@ manga_cards_html = ""
 for manga in mangas:
     manga_cards_html += f"""
     <a href="{manga['id']}/index.html" class="card">
-        <img src="images/{manga['cover']}" alt="{manga['title']}">
+        <img src="{manga['cover']}" alt="{manga['title']}">
         <div class="card-content">
             <h3>{manga['title']}</h3>
         </div>
@@ -326,7 +326,7 @@ for manga in mangas:
         images_html = ""
         for img in chapter["images"]:
             # "loading='lazy'" permet d'optimiser le site en chargeant les images seulement quand on scrolle
-            images_html += f'<img src="../images/{img}" alt="Page de manga" loading="lazy">\n'
+            images_html += f'<img src="{img}" alt="Page de manga" loading="lazy">\n'
             
         # Écriture du fichier HTML du chapitre (ex: dist/maitresse-et-eleve/chapitre-0.html)
         chapter_html = CHAPTER_TEMPLATE \
@@ -348,4 +348,4 @@ for manga in mangas:
         f.write(manga_html)
 
 print("Génération terminée avec succès !")
-print("Tous tes fichiers sont prêts dans le dossier 'dist'. N'oublie pas d'uploader tes images dans le dossier 'dist/images' sur GitHub avant de déployer.")
+print("Tous tes fichiers sont prêts dans le dossier 'dist'.")
